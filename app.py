@@ -19,7 +19,7 @@ from linebot.models import (
 app = Flask(__name__)
 
 config = configparser.ConfigParser()
-config.read("config_local.ini")
+config.read("config.ini")
 
 line_bot_api = LineBotApi(config['line_bot_token']['channel_access_token'])
 handler = WebhookHandler(config['line_bot_token']['channel_secret'])
