@@ -1,5 +1,6 @@
 import configparser
 import tempfile, os
+import math
 
 from flask import Flask, request, abort
 from PIL import Image, ImageDraw, ImageFont
@@ -94,7 +95,7 @@ def add_watermark(text, font_name, image_file):
         font_size = 1
         image_fraction = 0.30
         font = ImageFont.truetype(font_name, font_size)
-        while font.getsize(text)[0] < image_fraction * original_image_width:
+        while font.getsize(text)[0] < image_fraction * (math.sqrt(original_image_width * original_image_height)):
             # iterate until the text size is just larger than the criteria (fraction * image geometric mean)
             font_size += 1
             font = ImageFont.truetype(font_name, font_size)
