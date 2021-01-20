@@ -90,49 +90,53 @@ def add_watermark(text, font_name, image_file):
     original_image_width = original_image_size[0]
     original_image_height = original_image_size[1]
     
-    font_size = 1
-    image_fraction = 0.30
-    font = ImageFont.truetype(font_name, font_size)
-    while font.getsize(text)[0] < image_fraction * original_image_width:
-        # iterate until the text size is just larger than the criteria (fraction * image geometric mean)
-        font_size += 1
+    try:
+        font_size = 1
+        image_fraction = 0.30
         font = ImageFont.truetype(font_name, font_size)
+        while font.getsize(text)[0] < image_fraction * original_image_width:
+            # iterate until the text size is just larger than the criteria (fraction * image geometric mean)
+            font_size += 1
+            font = ImageFont.truetype(font_name, font_size)
 
-    # calculate text size in pixels (width, height)
-    text_size = font.getsize(text) 
-    # create image for text
-    text_image = Image.new('RGBA', text_size, (255, 255, 255, 0))
-    text_draw = ImageDraw.Draw(text_image)
+        # calculate text size in pixels (width, height)
+        text_size = font.getsize(text) 
+        # create image for text
+        text_image = Image.new('RGBA', text_size, (255, 255, 255, 0))
+        text_draw = ImageDraw.Draw(text_image)
 
-    # draw text on image
-    text_draw.text((0, 0), text, (220, 220, 220, 129), font=font)
-    
-    # rotate text image and fill with transparent color
-    rotated_text_image = text_image.rotate(45, expand=True, fillcolor=(0, 0, 0, 0))
-    rotated_text_image_size = rotated_text_image.size
+        # draw text on image
+        text_draw.text((0, 0), text, (220, 220, 220, 129), font=font)
+        
+        # rotate text image and fill with transparent color
+        rotated_text_image = text_image.rotate(45, expand=True, fillcolor=(0, 0, 0, 0))
+        rotated_text_image_size = rotated_text_image.size
 
-    # calculate top/left corner for centered text
-    parts = 8
-    offset_x = original_image_width//parts
-    offset_y = original_image_height//parts
+        # calculate top/left corner for centered text
+        parts = 8
+        offset_x = original_image_width//parts
+        offset_y = original_image_height//parts
 
-    start_x = original_image_width//parts - rotated_text_image_size[0]//2
-    start_y = original_image_height//parts - rotated_text_image_size[1]//2
+        start_x = original_image_width//parts - rotated_text_image_size[0]//2
+        start_y = original_image_height//parts - rotated_text_image_size[1]//2
 
-    combined_image = original_image.convert('RGBA')
-    for a in range(0, parts, 2):
-        for b in range(0, parts, 2):
-            x = start_x + a*offset_x
-            y = start_y + b*offset_y
-            # image with the same size and transparent color (..., ..., ..., 0)
-            watermarks_image = Image.new('RGBA', original_image_size, (255, 255, 255, 0))
-            # put text in expected place on watermarks image
-            watermarks_image.paste(rotated_text_image, (x, y))
-            # put watermarks image on original image
-            combined_image = Image.alpha_composite(combined_image, watermarks_image)
+        combined_image = original_image.convert('RGBA')
+        for a in range(0, parts, 2):
+            for b in range(0, parts, 2):
+                x = start_x + a*offset_x
+                y = start_y + b*offset_y
+                # image with the same size and transparent color (..., ..., ..., 0)
+                watermarks_image = Image.new('RGBA', original_image_size, (255, 255, 255, 0))
+                # put text in expected place on watermarks image
+                watermarks_image.paste(rotated_text_image, (x, y))
+                # put watermarks image on original image
+                combined_image = Image.alpha_composite(combined_image, watermarks_image)
 
-    combined_image = combined_image.convert("RGB")
-    combined_image.save(image_file)
+        combined_image = combined_image.convert("RGB")
+        combined_image.save(image_file)
+    except:
+        original_image.close()
+        raise Exception("Handle image error")
 
 
 if __name__ == "__main__":
